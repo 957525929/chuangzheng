@@ -1,115 +1,157 @@
 <template>
   <div>
-    <a-modal :title="title" :visible="visible" @cancel="$emit('update:visible', false), form.resetFields()">
+    <a-modal :title="title" :visible="visible" @cancel="handlerCancel">
       <template slot="footer">
-        <a-button @click="$emit('update:visible', false), form.resetFields()">取消</a-button>
+        <a-button @click="handlerCancel">取消</a-button>
         <a-button v-show="title != '查看'" type="primary" @click="ok" :loading="confirmLoading">确定 </a-button>
       </template>
-      <a-form :form="form" :label-col="{ span: 5 }" :wrapper-col="{ span: 16 }">
-        <a-form-item label="名称">
-          <a-input
-            v-decorator="['name', { initialValue: formData.name, rules: [{ required: true, message: '请输入名称' }] }]"
-            placeholder="请输入名称"
-            :disabled="!canEdit"
-          ></a-input>
-        </a-form-item>
-        <a-form-item v-if="title === '新增'" label="英文名称">
-          <a-input
-            v-decorator="[
-              'eName',
-              { initialValue: formData.eName, rules: [{ required: true, message: '请输入英文名称' }] }
-            ]"
-            placeholder="请输入英文名称"
-            :disabled="!canEdit"
-          ></a-input>
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea
-            v-decorator="['description', { initialValue: formData.description }]"
-            placeholder="请输入描述"
-            :disabled="!canEdit"
-          ></a-textarea>
-        </a-form-item>
-      </a-form>
+      <Form ref="vueForm" :formItem="form_item" :formData="formData" :labelCol="labelCol" :wrapperCol="wrapperCol" />
     </a-modal>
   </div>
 </template>
 
 <script>
-import { formatDate } from '@/utils/util'
 import { addScene, updateScene } from '@/api/scene'
-
+import Form from '@/components/form'
 export default {
-  props: ['visible', 'title', 'rowData'],
+  // props: ['visible', 'title', 'rowData'],
+  components: {
+    Form
+  },
   data() {
     return {
-      form: this.$form.createForm(this, { name: 'rule' }),
       formData: {
         pathNodeId: '',
         eName: '',
-        id: ''
+        id: '',
+        name: '',
+        updateTime: '',
+        description: ''
       },
+      formData_init: {},
       canEdit: false,
-      confirmLoading: false
+      confirmLoading: false,
+      visible: false,
+      title: '',
+      form_item_init: [
+        {
+          type: 'input',
+          label: '名称',
+          name: 'name',
+          required: true,
+          readOnly: false
+        },
+        {
+          type: 'input',
+          label: '英文名称',
+          name: 'eName',
+          required: true,
+          readOnly: false
+        },
+        {
+          type: 'textarea',
+          label: '描述',
+          name: 'description',
+          readOnly: false
+        }
+      ],
+      form_item: [],
+      labelCol: {
+        span: 5
+      },
+      wrapperCol: {
+        span: 16
+      }
     }
   },
+  mounted() {
+    this.form_item = [...this.form_item_init]
+    this.form_item = this.form_item.filter(item => item.name != 'eName')
+  },
   methods: {
-    ok() {
-      this.form.validateFields((err, values) => {
-        console.log(values)
-        var data = { ...this.formData }
+    async add() {
+      this.visible = true
+      // console.log('form_item', this.form_item)
 
-        if (!err) {
-          this.confirmLoading = true
-          if (this.title === '新增') {
-            let params = {
-              parentNode: 'root',
-              pid: 0,
-              name: values.name,
-              nameEng: values.eName,
-              description: values.description
-            }
-            addScene(params)
-              .then(res => {
-                if (res.code == 200) {
-                  this.$message.success('添加成功')
-                }
-                this.confirmLoading = false
-                this.$emit('updateData', this.title, data)
-              })
-              .catch(e => {
-                this.confirmLoading = false
-                console.log(e)
-              })
-          } else {
-            console.log(this.rowData)
-            let params = {
-              id: this.rowData.id,
-              pathNodeId: this.rowData.pathNodeId,
-              name: values.name,
-              description: values.description
-            }
-            if (values.name != this.formData.name || values.description != this.formData.description) {
-              updateScene(params)
-                .then(res => {
-                  if (res.code == 200) {
-                    this.$message.success('修改成功')
-                  }
-                  this.confirmLoading = false
-                  this.$emit('updateData', this.title, data)
-                })
-                .catch(e => {
-                  this.confirmLoading = false
-                  console.log(e)
-                })
-            } else {
-              this.confirmLoading = false
-            }
-          }
-          this.$emit('update:visible', false)
-          this.form.resetFields()
+      await this.reset()
+      this.form_item = this.form_item_init
+    },
+    async edit(record) {
+      this.visible = true
+      this.formData = { ...record }
+      this.rowData = record
+    },
+    async look(record) {
+      this.visible = true
+      this.formData = { ...record }
+    },
+    reset() {
+      for (let key in this.formData) {
+        this.formData[key] = ''
+      }
+    },
+    handlerCancel() {
+      this.visible = false
+      // this.$refs.vueForm.$refs.form.resetFields()
+      for (let key in this.formData) {
+        this.formData[key] = ''
+      }
+    },
+    ok() {
+      this.$refs.vueForm.$refs.form.validate(valid => {
+        if (valid) {
+          this.title == '新增' ? this.addModal() : this.editModal()
         }
       })
+    },
+    async addModal() {
+      this.confirmLoading = true
+      let params = {
+        parentNode: 'root',
+        pid: 0,
+        name: this.formData.name,
+        nameEng: this.formData.eName,
+        description: this.formData.description
+      }
+      addScene(params)
+        .then(res => {
+          if (res.code == 200) {
+            this.$message.success('添加成功')
+          }
+          this.confirmLoading = false
+          this.$emit('updateData', this.title, data)
+        })
+        .catch(e => {
+          this.confirmLoading = false
+          console.log(e)
+        })
+      await this.handlerCancel()
+    },
+    async editModal() {
+      // console.log(this.rowData)
+      this.confirmLoading = true
+      let params = {
+        id: this.rowData.id,
+        pathNodeId: this.rowData.pathNodeId,
+        name: this.formData.name,
+        description: this.formData.description
+      }
+      if (this.rowData.name != this.formData.name || this.rowData.description != this.formData.description) {
+        updateScene(params)
+          .then(res => {
+            if (res.code == 200) {
+              this.$message.success('修改成功')
+            }
+            this.confirmLoading = false
+            this.$emit('updateData')
+          })
+          .catch(e => {
+            this.confirmLoading = false
+            console.log(e)
+          })
+      }
+      await this.handlerCancel()
+      this.confirmLoading = false
     }
   },
   watch: {
@@ -125,8 +167,14 @@ export default {
     title() {
       if (this.title === '查看') {
         this.canEdit = false
+        this.form_item.forEach(item => {
+          item.readOnly = true
+        })
       } else {
         this.canEdit = true
+        this.form_item.forEach(item => {
+          item.readOnly = false
+        })
       }
     }
   }

@@ -17,20 +17,32 @@
       <a-input
         v-if="item.type === 'input'"
         :placeholder="`${type_msg[item.type]}${item.label}`"
+        :readOnly="item.readOnly"
         v-model="formData[item.name]"
       ></a-input>
       <a-textarea
         v-if="item.type === 'textarea'"
         :placeholder="`${type_msg[item.type]}${item.label}`"
         :rows="item.rows"
+        :readOnly="item.readOnly"
         v-model="formData[item.name]"
       ></a-textarea>
-      <a-checkbox-group v-if="item.type === 'checkbox'" v-model="formData[item.name]" :options="item.options">
+      <a-checkbox-group
+        v-if="item.type === 'checkbox'"
+        :readOnly="item.readOnly"
+        v-model="formData[item.name]"
+        :options="item.options"
+      >
       </a-checkbox-group>
-      <a-radio-group v-if="item.type === 'radio'" v-model="formData[item.name]" :options="item.options">
+      <a-radio-group
+        v-if="item.type === 'radio'"
+        v-model="formData[item.name]"
+        :options="item.options"
+        :readOnly="item.readOnly"
+      >
       </a-radio-group>
 
-      <a-select v-if="item.type === 'select'" v-model="formData[item.name]">
+      <a-select v-if="item.type === 'select'" v-model="formData[item.name]" :readOnly="item.readOnly">
         <a-select-option v-for="x in item.option" :key="x.value">
           {{ x.label }}
         </a-select-option>
@@ -41,18 +53,21 @@
         :placeholder="`${type_msg[item.type]}${item.label}`"
         v-model="formData[item.name]"
         :display-render="displayRender"
+        :readOnly="item.readOnly"
       />
       <div v-if="item.type === 'picker'">
         <a-date-picker
           :format="item.format"
           :placeholder="`${type_msg[item.type]}${item.startTimeLabel}`"
           v-model="formData[item.startTime]"
+          :readOnly="item.readOnly"
         />
         ~
         <a-date-picker
           :format="item.format"
           :placeholder="`${type_msg[item.type]}${item.endTimeLabel}`"
           v-model="formData[item.endTime]"
+          :readOnly="item.readOnly"
         />
       </div>
       <!-- {{item.options}} -->
@@ -153,9 +168,11 @@ export default {
   watch: {
     formItem: {
       handler(newValue) {
+        console.log('newValue', newValue)
         this.initFormData()
       },
-      immediate: true
+      immediate: true,
+      deep: true
     },
     formHandler: {
       handler(newValue) {

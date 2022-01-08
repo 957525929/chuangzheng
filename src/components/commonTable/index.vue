@@ -11,8 +11,8 @@
         onChange: pageChange
       }"
     >
-      <template :slot="action" slot-scope="text, record">
-        <slot name="action" v-bind="record"></slot>
+      <template v-slot:action="record">
+        <slot name="action"></slot>
       </template>
     </a-table>
   </div>
