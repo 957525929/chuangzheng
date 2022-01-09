@@ -37,6 +37,13 @@ export const monitor = {
   tableData: [],
   form_item: [
     {
+      type: 'select',
+      label: '场景',
+      name: 'sceneId',
+      style: 'width:200px',
+      option: []
+    },
+    {
       type: 'input',
       label: '名称',
       name: 'name'

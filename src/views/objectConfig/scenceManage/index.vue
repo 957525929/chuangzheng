@@ -21,6 +21,7 @@
           ipagination
         }"
         rowkey="id"
+        @change="handleTableChange"
       >
         <span slot="action" slot-scope="text, record">
           <a @click="handleLook(record)">查看</a>

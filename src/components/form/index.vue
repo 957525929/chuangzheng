@@ -42,7 +42,13 @@
       >
       </a-radio-group>
 
-      <a-select v-if="item.type === 'select'" v-model="formData[item.name]" :readOnly="item.readOnly">
+      <a-select
+        v-if="item.type === 'select'"
+        v-model="formData[item.name]"
+        :placeholder="`${type_msg[item.type]}${item.label}`"
+        :readOnly="item.readOnly"
+        :style="item.style"
+      >
         <a-select-option v-for="x in item.option" :key="x.value">
           {{ x.label }}
         </a-select-option>
