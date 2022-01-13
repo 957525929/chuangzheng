@@ -174,7 +174,7 @@ export default {
   watch: {
     formItem: {
       handler(newValue) {
-        console.log('newValue', newValue)
+        // console.log('newValue', newValue)
         this.initFormData()
       },
       immediate: true,

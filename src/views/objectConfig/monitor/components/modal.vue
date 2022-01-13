@@ -18,7 +18,7 @@
             :disabled="!canEdit"
           >
             <a-select-option v-for="item in sceneOption" :key="item.key" :value="item.key">
-              {{ item.value }}
+              {{ item.label }}
             </a-select-option>
           </a-select>
         </a-form-item>
@@ -75,29 +75,44 @@ export default {
   },
   mounted() {},
   methods: {
-    showModal(key, value) {
+    // showModal(key, value) {
+    //   this.visible = true
+    //   console.log(value)
+    //   if (key == 'add') {
+    //     this.title = '新增'
+    //     this.rowData = ''
+    //     for (let key in this.formData) {
+    //       this.formData[key] = ''
+    //     }
+    //     this.formData.sceneId = undefined
+    //   } else if (key == 'look') {
+    //     this.title = '查看'
+    //     this.rowData = value
+    //     for (let key in this.formData) {
+    //       this.formData[key] = this.rowData[key]
+    //     }
+    //   } else {
+    //     this.title = '编辑'
+    //     this.rowData = value
+    //     for (let key in this.formData) {
+    //       this.formData[key] = this.rowData[key]
+    //     }
+    //   }
+    // },
+    async add() {
       this.visible = true
-      console.log(value)
-      if (key == 'add') {
-        this.title = '新增'
-        this.rowData = ''
-        for (let key in this.formData) {
-          this.formData[key] = ''
-        }
-        this.formData.sceneId = undefined
-      } else if (key == 'look') {
-        this.title = '查看'
-        this.rowData = value
-        for (let key in this.formData) {
-          this.formData[key] = this.rowData[key]
-        }
-      } else {
-        this.title = '编辑'
-        this.rowData = value
-        for (let key in this.formData) {
-          this.formData[key] = this.rowData[key]
-        }
-      }
+      // console.log('form_item', this.form_item)
+      console.log('sceneOption', this.sceneOption)
+      this.form_item = this.form_item_init
+    },
+    async edit(record) {
+      this.visible = true
+      this.formData = { ...record }
+      this.rowData = record
+    },
+    async look(record) {
+      this.visible = true
+      this.formData = { ...record }
     },
     ok() {
       this.form.validateFields((err, values) => {

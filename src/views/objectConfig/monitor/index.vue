@@ -17,13 +17,13 @@
         <a-button @click="handleAdd">新增</a-button>
         <a-table
           :columns="columns"
-          :data-source="dataSource"
+          :data-source="tableData"
           :loading="loading"
           :pagination="{
             ipagination
           }"
           @change="handleTableChange"
-          rowkey="id"
+          row-key="id"
         >
           <span slot="action" slot-scope="text, record">
             <a @click="handleLook(record)">查看</a>
@@ -51,7 +51,7 @@
             <j-ellipsis :value="text" :length="10" />
           </span>
         </a-table>
-        <Modal ref="table" @updateData="updateData" v-bind="$attrs" />
+        <Modal ref="modalForm" @updateData="updateData" :sceneOption="sceneOption" />
       </div>
     </a-card>
   </div>
@@ -79,8 +79,8 @@ export default {
     return {
       sceneOption: [],
       queryParam: {
-        startTime: '',
-        endTime: '',
+        startTime: null,
+        endTime: null,
         name: '',
         sceneId: ''
       },
@@ -98,52 +98,46 @@ export default {
       url: {
         list: '/programmerweb/SceneItemController/getSceneItemList'
       },
-      tableData: []
+      tableData: [],
+      getKey: false
     }
   },
   mounted() {
-    setTimeout(() => {
-      this.loadSenceData()
-    }, 200)
+    // setTimeout(() => {
+    //   this.loadSenceData()
+    // }, 200)
+    // this.loadSence()
   },
   methods: {
-    async loadSenceData() {
-      // this.$refs.table.loading_tab = true
-      // let params = {}
-      // let data1 = this.queryParam
-      // // 过滤空数据
-      // for (let key in data1) {
-      //   if (data1[key]) {
-      //     params[key] = data1[key]
-      //   }
-      // }
-      // console.log(params, 'params')
-      // let res = await getSceneItemList(params)
-      console.log('assaas')
+    async loadSence() {
       let data = await getSceneList()
       this.sceneOption = this.handlerOption(data.data)
-
       let res = this.form_item.filter(item => item.label == '场景')
       let option = [{ label: '全部', value: '' }, ...this.sceneOption]
       res.forEach(item => (item.option = option))
-      console.log('this.dataSource', this.dataSource)
-      console.log(' this.form_item', res)
-      if (this.dataSource && this.sceneOption) {
-        for (let key in this.dataSource) {
+    },
+    async loadSenceData() {
+      let data1 = await getSceneList()
+      this.sceneOption = this.handlerOption(data1.data)
+      let res = this.form_item.filter(item => item.label == '场景')
+      let option = [{ label: '全部', value: '' }, ...this.sceneOption]
+      res.forEach(item => (item.option = option))
+      let data = [...this.dataSource]
+      if (data && this.sceneOption) {
+        for (let key in data) {
           for (let v in this.sceneOption) {
-            if (this.dataSource[key].sceneId == this.sceneOption[v].key) {
-              this.dataSource[key].scene = this.sceneOption[v].label
+            if (data[key].sceneId == this.sceneOption[v].key) {
+              data[key].scene = this.sceneOption[v].label
             }
           }
         }
-        this.dataSource = [...this.dataSource]
-        console.log('this.dataSource', this.dataSource)
+        this.tableData = [...data]
       }
     },
     async updateData() {
       await this.loadData()
       // setTimeout(() => {
-      await this.loadSenceData()
+      // await this.loadSenceData()
       // }, 200)
     },
     handlerOption(params) {
@@ -156,29 +150,16 @@ export default {
       })
     },
     async searchData(value) {
-      // console.log('value', value)
-      // this.queryParam.startTime = value.startTime
-      // this.queryParam.endTime = value.endTime
-      // this.queryParam.name = value.name
-      // this.queryParam.sceneId = value.sceneId
-      // this.$refs.search.loading_but = true
-      // if (value.sceneId == '') {
-      //   delete data.sceneId
-      // }
-      // console.log(data)
-      // console.log('search', value)
       this.loadData()
-      await this.loadSenceData()
     }
   },
   watch: {
     dataSource: {
       handler(newVal) {
         // console.log(newVal, 'newVal')
-        // this.dataSource = newVal
+        this.loadSenceData()
       },
-      immediate: true,
-      deep: true
+      immediate: true
     }
   }
 }

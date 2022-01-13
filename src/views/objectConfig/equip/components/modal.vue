@@ -103,7 +103,7 @@ export default {
   components: {
     ParamsTable
   },
-  props: ['visible', 'title', 'rowData', 'getTypeData'],
+  props: ['getTypeData'],
   data() {
     return {
       form: this.$form.createForm(this, { name: 'rule' }),
@@ -122,10 +122,27 @@ export default {
       canEdit: false,
       dataSource: [],
       getData: [],
-      confirmLoading: false
+      confirmLoading: false,
+      visible: false,
+      title: ''
     }
   },
   methods: {
+    async add() {
+      this.visible = true
+      // console.log('form_item', this.form_item)
+      console.log('sceneOption', this.sceneOption)
+      this.form_item = this.form_item_init
+    },
+    async edit(record) {
+      this.visible = true
+      this.formData = { ...record }
+      this.rowData = record
+    },
+    async look(record) {
+      this.visible = true
+      this.formData = { ...record }
+    },
     ok() {
       this.form.validateFields((err, values) => {
         var data = { ...values }
@@ -145,7 +162,7 @@ export default {
       this.formData.selectValue = value
     },
     addData(value) {
-      console.log('dataSource', this.dataSource)
+      // console.log('dataSource', this.dataSource)
       this.$refs.paramsTable.$refs.editableTable.getValues((error, values) => {
         // // 错误数 = 0 则代表验证通过
         if (error === 0) {
@@ -174,7 +191,7 @@ export default {
         if (res.code == 200) {
           this.$emit('updateData')
           this.$message.success('新增成功')
-          this.$emit('update:visible', false)
+          this.visible = false
           this.confirmLoading = false
           this.form.resetFields()
         }
@@ -209,7 +226,7 @@ export default {
           }
           this.confirmLoading = false
         }
-        this.$emit('update:visible', false)
+        this.visible = false
         this.form.resetFields()
       } catch (e) {
         this.confirmLoading = false
@@ -219,7 +236,7 @@ export default {
       if (this.title === '新增仪器') {
         this.$refs.paramsTable.delData()
       }
-      this.$emit('update:visible', false)
+      this.visible = false
       this.form.resetFields()
     }
   },

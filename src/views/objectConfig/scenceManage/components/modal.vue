@@ -46,7 +46,7 @@ export default {
           label: '英文名称',
           name: 'eName',
           required: true,
-          readOnly: false
+          readOnly: false,
         },
         {
           type: 'textarea',
